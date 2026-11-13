@@ -15,6 +15,7 @@ import pyarrow.parquet as pq
 from PIL import Image
 
 from common import CACHE, DATA, class_index
+from paths import compare_to_paper, digest
 
 
 def prep(im):
@@ -48,13 +49,6 @@ def _paths(name):
     return os.path.join(CACHE, f"{name}.npz"), os.path.join(CACHE, f"{name}.json")
 
 
-def _digest(x, y):
-    h = hashlib.sha1()
-    h.update(np.ascontiguousarray(x).tobytes())
-    h.update(np.asarray(y, dtype=np.int64).tobytes())
-    return h.hexdigest()
-
-
 def done(name, sources):
     """True if a valid cache for exactly these sources exists; raises on a stale or unverifiable cache"""
     npz, man = _paths(name)
@@ -66,7 +60,7 @@ def done(name, sources):
     if ok:
         m = json.load(open(man))
         d = np.load(npz)
-        ok = m.get("sources") == sources and m.get("sha1") == _digest(d["x"], d["y"])
+        ok = m.get("sources") == sources and m.get("sha1") == digest(d["x"], d["y"])
     if not ok:
         raise RuntimeError(f"{npz} does not match its sources or manifest; delete it or set FRF_REBUILD=1")
     return True
@@ -75,7 +69,9 @@ def done(name, sources):
 def save(name, x, labels, sources):
     npz, man = _paths(name)
     np.savez(npz, x=x, y=np.asarray(labels, dtype=np.int64))
-    json.dump(dict(name=name, n=len(labels), sources=sources, sha1=_digest(x, labels)), open(man, "w"))
+    h = digest(x, labels)
+    json.dump(dict(name=name, n=len(labels), sources=sources, sha1=h), open(man, "w"))
+    compare_to_paper(name, h)
     print(name, x.shape, flush=True)
 
 

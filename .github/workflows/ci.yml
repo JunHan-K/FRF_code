@@ -11,7 +11,7 @@ jobs:
       - name: install (CPU)
         run: |
           pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
-          pip install pytest pyflakes
+          pip install numpy==2.2.6 scipy==1.15.3 pytest pyflakes
       - name: lint
         run: python -m pyflakes src tests
       - name: compile

@@ -6,7 +6,7 @@ Locate (id_fit[:500]): dR(d) = R(d) - R(d-1), d = k+1..11 (head step excluded), 
 Intervene (id_hold[500:], the images not used for the PREREG36 cell labels): in the reference suffix, skip native block d
 (main) or replace it by the recovered net's block d (secondary), for every d in k+1..11; read alpha and m1 through it.
 Reproduction check: alpha and m1 of base on id_hold[:500] without intervention (must match out/p25 within 1e-3).
-usage: p43.py <model> <perm>"""
+usage: p43.py <model> <perm>   (needs the P14_TAG=lens runs of src/p14.py for the slots to read)"""
 import glob
 import json
 import os
@@ -47,6 +47,8 @@ def main(model, p):
     nrm = S.Norm(nat).to(S.dev)
     L = len(nat.blocks)
     ks = sorted(int(f.split("_")[-2]) for f in glob.glob(f"{SW}/out/p25/{model}_{p}_*_lens.json"))
+    if not ks:  # slots = those measured by the PREREG25 p14 runs: P14_TAG=lens python src/p14.py <model> <perm> <slot>
+        sys.exit(f"no out/p25/{model}_{p}_<slot>_lens.json; run P14_TAG=lens python src/p14.py {model} {p} <slot> first")
     xf, _ = S.cache("id_fit")
     xf = torch.cat([nrm(xf[s:s + 100].to(S.dev).float().div_(255)).cpu() for s in range(0, NA, 100)])
     xh, _ = S.cache("id_hold")

@@ -1,6 +1,6 @@
 """Model registry and block permutations; trains one disrupted-and-recovered network (deit_perm.main).
 Runs: D_C (unperturbed re-training), D_L<s> (blocks 6-11 permuted by NEW_PI / deit_perm.PI), D_E<s> (blocks 0-5 permuted).
-usage: s12r.py <model> <run>      (S_SEED / surgery.SEED selects the training seed)"""
+usage: s12r.py <model> <run>      (DS_SEED selects the training seed; output out/s12r_<model>[_seed<n>]/<run>.pt)"""
 import os
 import sys
 

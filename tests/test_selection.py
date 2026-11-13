@@ -46,3 +46,11 @@ def test_scripts_use_the_table():
     assert _assigned("p120.py", "OURS_ALPHA") == ["{g: SEL.SELECTED[g] for g in GROUPS}"]
     (u,) = _assigned("unl118.py", "OURS_ALPHA")
     assert "SEL.SELECTED['dogs']" in u and "SEL.SELECTED_VITB" in u
+
+
+def test_availability_is_per_model(tmp_path):
+    """a missing model must not disable the check for the models whose runs exist"""
+    for a in ("native", "SD3-12H", "SD10-12H"):
+        json.dump({}, open(tmp_path / f"p108_g_deit_s_{a}.json", "w"))
+    assert SEL.available("g", out=str(tmp_path), models=("deit_s",))
+    assert not SEL.available("g", out=str(tmp_path))

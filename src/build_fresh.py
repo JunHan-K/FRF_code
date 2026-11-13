@@ -13,8 +13,7 @@ from multiprocessing import Pool
 import numpy as np
 from PIL import Image
 
-CACHE = os.environ.get("FRF_CACHE", "data/cache")
-DATA = os.environ.get("FRF_DATA", "data")
+from paths import CACHE, DATA, FRESH_MANIFEST, LISTS
 
 
 def load_path(path):  # identical to build_cache.prep (resize shorter side 256 bilinear, centre crop 224); inlined to avoid pyarrow
@@ -55,7 +54,10 @@ def main():
         for i in sorted(rng.choice(len(L), min(PER_CLASS, len(L)), replace=False)):
             pick.append((L[i][0], L[i][1], c))
     images = [dict(path=os.path.relpath(p, DATA), sha256=h, label=c) for p, h, c in pick]
-    npz, man_path = os.path.join(CACHE, "fresh.npz"), os.path.join(DATA, "v2new", "FRESH_MANIFEST.json")
+    paper = json.load(open(os.path.join(LISTS, "FRESH_MANIFEST.json")))
+    print("fresh selection:", "identical to" if paper["images"] == images else "DIFFERS from", "the paper's (data_lists/FRESH_MANIFEST.json)",
+          flush=True)
+    npz, man_path = os.path.join(CACHE, "fresh.npz"), FRESH_MANIFEST
     if os.path.exists(npz) and os.environ.get("FRF_REBUILD") != "1":
         # reuse an existing fresh set only if it is exactly the set this script selects and the file is unchanged
         old = json.load(open(man_path)) if os.path.exists(man_path) else {}
@@ -71,6 +73,8 @@ def main():
                n_classes=len(cand), preprocessing="resize shorter side 256 (bilinear), centre crop 224, uint8 CHW",
                npz_sha256=sha(npz), images=images)
     json.dump(man, open(man_path, "w"), indent=0)
+    print("fresh.npz:", "identical to" if man["npz_sha256"] == paper["npz_sha256"] else "differs from (image decoding / library versions)",
+          "the file used for the paper", flush=True)
     print({k: v for k, v in man.items() if k != "images"})
 
 

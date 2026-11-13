@@ -3,7 +3,7 @@ Fisher inner products of float32 inputs; per-image R1 - R2 then reaches 0.24 on 
 in float64 the identity holds to ~1e-13. This recomputes R1 (direct), R2 (closed
 form from the skip-origin Gram) and R3 (affine 2-reference least squares) per image in float64, same images as p14
 (id_hold[:500]), for the controls that need no training: base, copy, scale_0.5/1.5/2.0.
-usage: p37ex.py <model> <perm>"""
+usage: p37ex.py <model> <perm>   (needs the P14_TAG=kdref runs of src/p14.py for the slots to recompute)"""
 import glob
 import json
 import os
@@ -38,6 +38,8 @@ def main(model, p):
     nrm = S.Norm(nat).to(S.dev)
     L = len(nat.blocks)
     ks = sorted(int(f.split("_")[-2]) for f in glob.glob(f"{SW}/out/p25/{model}_{p}_*_kdref.json"))
+    if not ks:  # slots = those measured by the PREREG25 p14 runs: P14_TAG=kdref python src/p14.py <model> <perm> <slot>
+        sys.exit(f"no out/p25/{model}_{p}_<slot>_kdref.json; run P14_TAG=kdref python src/p14.py {model} {p} <slot> first")
     xh, _ = S.cache("id_hold")
     xh = torch.cat([nrm(xh[s:s + 100].to(S.dev).float().div_(255)).cpu() for s in range(0, NA, 100)])
     res = dict(model=model, perm=p, n=NA, cells={})

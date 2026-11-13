@@ -123,7 +123,7 @@ def prune23(model, crit, rec):
     # recovery recipe: "main" = the removal results of the main text (rank-4 LoRA, 3,000 steps, final-token feature KD,
     # k = 1..4); "cheap" = the rank-1 / 1,000-step recipe of PREREG23 / PREREG25 C (k = 2..4). Single values can be overridden.
     rc = os.environ.get("P18_RECIPE", "main")
-    base = dict(main=("4", "3000", "1", "1,2,3,4", "_main"), cheap=("1", "1000", "0", "2,3,4", ""))[rc]
+    base = dict(main=("4", "3000", "1", "1,2,3,4", "_main"), cheap=("1", "1000", "0", "2,3,4", "_cheap"))[rc]
     RANK, STEPS = int(os.environ.get("P18_RANK", base[0])), int(os.environ.get("P18_STEPS", base[1]))
     FEAT = bool(int(os.environ.get("P18_FEATKD", base[2])))
     KS = tuple(int(k) for k in os.environ.get("P18_KS", base[3]).split(","))

@@ -16,8 +16,7 @@ def paths(model, tag):
     if SEED_SFX:
         base = f"out/s12r_{model}{SEED_SFX}"
         return f"{base}/{tag}.pt", f"{base}/dswap_{tag}.json", f"{base}/{tag}.json"
-    base = "out/depth" if model == "deit_s" and tag.split("_")[1] in ("La", "Lb") \
-        else f"out/s12r_{model}"
+    base = f"out/s12r_{model}"  # written by src/s12r.py <model> <tag>
     return f"{base}/{tag}.pt", f"{base}/dswap_{tag}.json", f"{base}/{tag}.json"
 
 

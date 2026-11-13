@@ -38,12 +38,11 @@ def rownorm(t):
 
 
 def e_paths(model, p, kind="E"):
-    """in-place checkpoints. E: early-shuffled (DeiT-S seed 0 from depth Phase 2, same recipe; the rest by p47train.py).
-    N: noise control (PREREG49).  p = 'a' | 'b', optionally with '_seed1' (PREREG49 seed replicate)."""
+    """in-place checkpoints written by src/p47train.py (E: early-shuffled; N: noise control, PREREG49; U: unperturbed).
+    p = 'a' | 'b' | ..., optionally with '_seed1' (seed replicate)."""
     q, _, sd = p.partition("_")
     sfx = f"_{sd}" if sd else ""
-    base = "out/depth" if model == "deit_s" and kind == "E" and not sfx and q in "ab" \
-        else f"out/s12r_{model}{sfx}"
+    base = f"out/s12r_{model}{sfx}"
     run = f"D_{kind}{q}"
     if kind in ("N", "U"):  # PREREG58: U = unperturbed network re-trained with the same recipe
         D.KEEP[run] = list(range(12))

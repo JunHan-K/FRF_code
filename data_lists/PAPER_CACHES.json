@@ -1,0 +1,4 @@
+{"note": "array SHA-1 (paths.digest: images uint8 (n,3,224,224) then labels int64) of the caches used for the paper",
+ "id_fit": {"n": 8000, "sha1": "5d5a1dbe3e10ddacb1ff67f77a3152505847cfda"},
+ "id_hold": {"n": 1976, "sha1": "88b2a432b4dd3d495f857c77d91c6079414972d2"},
+ "id_eval": {"n": 24, "sha1": "02b6caf8e91a640b24ae072b32205c9e4fd53dea"}}

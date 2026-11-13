@@ -108,7 +108,7 @@ def resel(model, crit):
             ps += p18.lora_wrap(blk, 1)
         p18.kd_train(m, nat, nrm, xf, ps, 1000, 1e-3, seed=0, featkd=True)
         m = p18.frozen(m)
-        stored = [c for c in cheap["steps"] if c["k"] == st["k"]][0]["acc"]
+        stored = next((c["acc"] for c in cheap["steps"] if c["k"] == st["k"]), None)  # cheap recipe has k = 2..4 only
         r["steps"].append(dict(k=st["k"], drop=st["drop"], acc={n: p18.top1(m, nrm, *v) for n, v in ev.items()},
                                stored_cheap=stored, metrics=evaluate(m, nat, nrm, data)))
         del m

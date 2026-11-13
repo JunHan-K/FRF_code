@@ -1,5 +1,5 @@
 """PREREG47 (E1): train an early-shuffled network (D_Ea / D_Eb) with the same KD recipe as the late-shuffled ones
-(depth/deit_perm.py; p17.py is the late-shuffled counterpart). DeiT-S seed 0 already has D_Ea / D_Eb in depth/out.
+(src/deit_perm.py; src/s12r.py trains the late-shuffled ones). Output: out/s12r_<model>/D_E<p>.pt.
 PREREG49 (E1 replication):
   seed replicate : DS_SEED=1 -> out/s12r_<model>_seed1/D_E<p>.pt (data order and augmentation only, as PREREG3)
   noise control  : run D_N<p> (p = a | b): blocks 6..11 stay in place; every parameter tensor of blocks 6..11 gets
@@ -37,12 +37,13 @@ if unp:
 
 if noise:
     D.KEEP[run] = list(range(12))
-    lbase = "out/depth" if model == "deit_s" else f"out/s12r_{model}"
     k0 = []
-    for q in "abcdef":
-        f = f"{lbase}/D_L{q}.json" if os.path.exists(f"{lbase}/D_L{q}.json") else f"out/s12r_{model}/D_L{q}.json"
+    for q in "abcdef":  # step-0 KL of the late-shuffled runs D_La..D_Lf (src/s12r.py), the target of the noise level
+        f = f"out/s12r_{model}/D_L{q}.json"
         if os.path.exists(f):
             k0.append(json.load(open(f))["ckpt"][0]["kl_teacher"])
+    if not k0:
+        sys.exit(f"noise control needs the late-shuffled runs out/s12r_{model}/D_L?.json (src/s12r.py {model} D_La ...)")
     med = lambda v: sorted(v)[len(v) // 2] if len(v) % 2 else 0.5 * sum(sorted(v)[len(v) // 2 - 1:len(v) // 2 + 1])  # noqa: E731
     target = med(k0) if k0 else None
     teacher = S.load(D.M).eval()

@@ -21,11 +21,9 @@ import json
 import os
 import sys
 
-import warnings
 
 import numpy as np
 import torch
-from scipy.optimize import minimize
 
 sys.path.insert(0, "src")
 import surgery as S  # noqa: E402
@@ -34,42 +32,13 @@ import e13  # noqa: E402
 import p18  # noqa: E402
 import s12r  # noqa: E402
 from p60 import parent_net  # noqa: E402
+from simplex import simplex_ls  # noqa: E402
 
 OUT = os.environ.get("P66_OUT", "out/p66")
 P57DIRS = ("out/p57", "out/p65", "out/p66par")
 dev = S.dev
 NC, MB, STEPS, LR = 500, 50, 100, 0.1
 KA = os.environ.get("P66_KA", "0").lower() not in ("", "0", "false", "no")
-
-
-def simplex_ls(A, b):
-    """min_w w'Aw - 2b'w on the simplex (A, b pooled Gram terms)"""
-    s = np.trace(A) / len(A)
-    A, b = A / s, b / s
-    n = len(b)
-    r = minimize(lambda w: w @ A @ w - 2 * b @ w, np.full(n, 1.0 / n), jac=lambda w: 2 * A @ w - 2 * b, method="SLSQP",
-                 bounds=[(0, 1)] * n, constraints=[dict(type="eq", fun=lambda w: w.sum() - 1, jac=lambda w: np.ones(n))],
-                 options=dict(maxiter=500, ftol=1e-14))
-    w = np.clip(np.nan_to_num(r.x, nan=0.0, posinf=0.0, neginf=0.0), 0, None)
-    valid = bool(np.isfinite(r.x).all() and w.sum() > 0)
-    w = w / w.sum() if valid else np.full(n, 1.0 / n)
-    if not (r.success and valid):  # convex QP: fall back to projected gradient on the simplex, keep the better solution
-        warnings.warn(f"simplex_ls: SLSQP failed ({r.message}); using projected-gradient fallback")
-        v, L = np.full(n, 1.0 / n), 2 * np.linalg.eigvalsh(A).max() + 1e-12
-        for _ in range(20000):
-            v = _proj_simplex(v - (2 * A @ v - 2 * b) / L)
-        f = lambda u: u @ A @ u - 2 * b @ u
-        if f(v) < f(w):
-            w = v
-    return w
-
-
-def _proj_simplex(v):
-    """Euclidean projection onto the probability simplex (Duchi et al. 2008)."""
-    u = np.sort(v)[::-1]
-    css = np.cumsum(u)
-    k = np.nonzero(u * np.arange(1, len(v) + 1) > css - 1)[0][-1]
-    return np.maximum(v - (css[k] - 1) / (k + 1), 0)
 
 
 def fisher_ip(a, b, p):  # a, b (n, C), p (n, C): Cov_p(a, b) per image

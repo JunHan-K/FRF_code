@@ -15,6 +15,9 @@ import huggingface_hub as hf
 from safetensors.torch import load_file
 from torchvision.ops import roi_align
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import paths  # noqa: E402
+
 # FRF_DETERMINISTIC=1: deterministic GPU kernels where PyTorch has them (slower; not used for the paper runs, see README)
 if os.environ.get("FRF_DETERMINISTIC", "0").strip().lower() in ("1", "true", "yes", "on"):
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
@@ -22,7 +25,7 @@ if os.environ.get("FRF_DETERMINISTIC", "0").strip().lower() in ("1", "true", "ye
     torch.backends.cudnn.deterministic = True
     torch.use_deterministic_algorithms(True, warn_only=True)
 
-CACHE = "data/cache"
+CACHE = paths.CACHE
 OUT = "out/depth"
 M36, M24 = "cait_xxs36_224.fb_dist_in1k", "cait_xxs24_224.fb_dist_in1k"
 KEEP = {"V_uni": [i for i in range(36) if i % 3 != 2], "V_first": list(range(24)), "V_last": list(range(12, 36)),
@@ -58,6 +61,7 @@ def load(n):
 def cache(name):
     d = np.load(os.path.join(CACHE, f"{name}.npz"))
     x, y = d["x"], d["y"]
+    paths.verify(name, x, y)
     if SMOKE:
         x, y = x[:SMOKE], y[:SMOKE]
     return torch.from_numpy(x), torch.from_numpy(y)

@@ -22,7 +22,7 @@ Measured on fresh (labels): forget / retain top-1; steps to criterion; stitch(k)
 distillation from the native network on retain-class id_fit images only, 300 steps, lr 1e-3); frame of each block k at slot k
 (nu, E, change energy) on forget images and on retain images[:500].
 Written 2026-11-06 20:20 KST, before any PREREG95 network exists.
-usage: p95.py <model> <arm>"""
+usage: p96.py <model> <arm>"""
 import copy
 import json
 import math

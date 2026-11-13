@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import torch
 
-CACHE = os.environ.get("FRF_CACHE", "data/cache")
+from paths import CACHE
 SPLITS = ("id_fit", "id_hold", "id_eval", "fresh")
 NEAR = 0.98
 

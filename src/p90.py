@@ -19,6 +19,7 @@ import torch  # noqa: E402
 
 sys.path.insert(0, "src")
 import surgery as S  # noqa: E402
+import frame as FR  # noqa: E402
 import deit_perm as D  # noqa: E402
 import e13  # noqa: E402
 import p11  # noqa: E402
@@ -58,10 +59,7 @@ def slot_effects(nat, nrm, x, i, extra=None, keep=None):
 
 def frame(G):
     A, b, u = G[:12, :12], G[:12, 12], G[12, 12]
-    lam, V = np.linalg.eigh(A)
-    kp = lam > 1e-8 * lam.max()
-    w = V[:, kp] @ ((V[:, kp].T @ b) / lam[kp])
-    return w, max((u - 2 * w @ b + w @ A @ w) / u, 0.0)
+    return FR.fit(A, b)[0], FR.nu(A, b, u)
 
 
 def main(model, rule):

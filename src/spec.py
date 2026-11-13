@@ -7,7 +7,8 @@ functional equivalence groups; the spectrum is reported over the groups (role re
 All inputs are per-image Fisher Gram pieces: Gx (N,L,L) = <e_b,e_c>, cx (N,L) = <e_b,e_u>, ux (N,) = <e_u,e_u>."""
 import torch
 
-RIDGE = 1e-4
+RIDGE = 1e-4  # ridge * mean diagonal: a regularised estimate (slight floor for tiny effects); the out-of-frame share
+# of the paper is frame.nu (truncated pseudo-inverse, exact projection; src/check_nu.py compares the two)
 MERGE_CORR = -0.5  # merge two groups when their bootstrap weights correlate below this (trade-off = not identifiable)
 NBOOT = 200
 

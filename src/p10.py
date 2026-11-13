@@ -75,7 +75,7 @@ def main(mode, model, arg):
     if mode == "rewind":
         if arg == "DC":
             run = "D_C"
-            pt = "out/depth/D_C.pt" if model == "deit_s" else f"out/s12r_{model}/D_C.pt"
+            pt = f"out/s12r_{model}/D_C.pt"  # src/s12r.py <model> D_C
             a0 = top1(nat, nrm, xh, yh)
         else:
             parts = arg.split("_")

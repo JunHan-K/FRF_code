@@ -112,9 +112,11 @@ def frozen(m):
 
 
 def parent(model, kind, p):
+    """recovered network of `train model kind q`; p = q (seed DS_SEED, default 0) or q_seed<n> (that seed's run)"""
     q, _, sd = p.partition("_")
+    seed = int(sd[4:]) if sd.startswith("seed") else S.SEED
     m = build(model, kind, q)
-    m.load_state_dict(torch.load(f"{OUTROOT}/s12x_{model}_{sd}/D_{kind}{q}.pt", map_location=dev))
+    m.load_state_dict(torch.load(f"{run_dir(model, seed)}/D_{kind}{q}.pt", map_location=dev))
     return frozen(m)
 
 

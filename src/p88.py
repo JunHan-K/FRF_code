@@ -18,6 +18,7 @@ import torch.nn as nn  # noqa: E402
 
 sys.path.insert(0, "src")
 import surgery as S  # noqa: E402
+import frame as FR  # noqa: E402
 import deit_perm as D  # noqa: E402
 import e13  # noqa: E402
 import p11  # noqa: E402
@@ -30,11 +31,7 @@ K, RANK, STEPS, MB = 2, 4, int(os.environ.get("P88_STEPS", 3000)), 25  # P88_STE
 
 
 def nu_of(G):
-    A, b, u = G[:12, :12], G[:12, -1], G[-1, -1]
-    lam, V = np.linalg.eigh(A)
-    keep = lam > 1e-8 * lam.max()
-    w = V[:, keep] @ ((V[:, keep].T @ b) / lam[keep])
-    return max((u - 2 * w @ b + w @ A @ w) / u, 0.0)
+    return FR.nu_from_gram(G, 12, -1)
 
 
 def main(model, seed):

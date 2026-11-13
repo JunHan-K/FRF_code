@@ -6,9 +6,10 @@ import torch
 import torch.nn as nn
 import torchvision
 
+import paths
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.environ.get("FRF_DATA", "data")
-CACHE = os.environ.get("FRF_CACHE", "data/cache")
+DATA, CACHE = paths.DATA, paths.CACHE
 OUT = os.environ.get("KT_OUT", os.path.join(ROOT, "out"))
 LAYERS = ["layer2", "layer3", "layer4"]
 # KT_POS=dissect (ViT only): positions inside the last block, each read out as patch mean (pm) and CLS
@@ -390,6 +391,7 @@ SMOKE = int(os.environ.get("SMOKE", "0"))
 def load_cache(name):
     d = np.load(os.path.join(CACHE, f"{name}.npz"))
     x, y = d["x"], d["y"]
+    paths.verify(name, x, y)
     if SMOKE:
         n = 2 if name == "id_eval" else (max(SMOKE, 40) if name == "id_fit" else SMOKE)
         x, y = x[:n], y[:n]

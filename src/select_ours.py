@@ -49,8 +49,8 @@ def available_vitb(out="out/p103"):
     return all(os.path.exists(f"{out}/p102_{m}_{a}.json") for m in VITB for a in ARMS)
 
 
-def available(group, out="out/p108"):
-    return all(os.path.exists(f"{out}/p108_{group}_{m}_{a}.json") for m in MODELS for a in ("native", *ARMS))
+def available(group, out="out/p108", models=MODELS):
+    return all(os.path.exists(f"{out}/p108_{group}_{m}_{a}.json") for m in models for a in ("native", *ARMS))
 
 
 def main(argv):

@@ -69,10 +69,15 @@ def rewind(nat, m, nrm, xF, yF, xR, yR):
 def main(group, model, arm):
     os.makedirs(OUT, exist_ok=True)
     fn = f"{OUT}/p120_{group}_{model}_{arm}.json"
-    if arm == "OURS" and SEL.available(group):  # re-derive the selection from the p108 runs if they are present
-        a = SEL.select(group, model)
-        if a != OURS_ALPHA[group][model]:
-            sys.exit(f"OURS alpha from out/p108 ({a}) differs from select_ours.SELECTED ({OURS_ALPHA[group][model]})")
+    if arm == "OURS":  # re-derive the selection from this model's p108 runs if they are present
+        if SEL.available(group, models=(model,)):
+            a = SEL.select(group, model)
+            if a != OURS_ALPHA[group][model]:
+                sys.exit(f"OURS alpha from out/p108 ({a}) differs from select_ours.SELECTED ({OURS_ALPHA[group][model]})")
+            print(f"OURS alpha {a} re-derived from out/p108", flush=True)
+        else:
+            print(f"OURS alpha {OURS_ALPHA[group][model]} from select_ours.SELECTED (out/p108 runs for {group} {model} "
+                  "not present, not re-derived)", flush=True)
     D.M = s12r.MODELS[model]
     torch.manual_seed(0)
     nat = p18.frozen(S.load(D.M).to(S.dev))
