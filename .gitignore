@@ -1,0 +1,9 @@
+data/
+out/
+figs/
+__pycache__/
+*.pyc
+*.pt
+*.pth
+*.npz
+*.safetensors
