@@ -15,6 +15,13 @@ import huggingface_hub as hf
 from safetensors.torch import load_file
 from torchvision.ops import roi_align
 
+# FRF_DETERMINISTIC=1: deterministic GPU kernels where PyTorch has them (slower; not used for the paper runs, see README)
+if os.environ.get("FRF_DETERMINISTIC", "0").strip().lower() in ("1", "true", "yes", "on"):
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
 CACHE = "data/cache"
 OUT = "out/depth"
 M36, M24 = "cait_xxs36_224.fb_dist_in1k", "cait_xxs24_224.fb_dist_in1k"

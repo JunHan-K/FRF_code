@@ -22,6 +22,8 @@ Experiment scripts are named `pNN.py` after the analyses of the paper.
 | `src/p18.py` | block removal (selection, recovery, accuracy, throughput) and shared training / evaluation helpers |
 | `src/p96.py`-`src/p120.py`, `src/unl118.py` | class unlearning: block damage, group-free LoRA repair, baselines, attacks, rewinding |
 | `src/select_ours.py` | damage strength of the unlearning method per group and model, chosen on `id_hold` only |
+| `src/spotter_sampling.py` | batch composition of the Spotter baseline |
+| `tests/` | CPU tests (no data, no GPU) |
 
 ## Data
 
@@ -65,6 +67,32 @@ python src/p120.py birds deit_s OURS                  # unlearning: damage + gro
 
 Each script states its arguments in its docstring (`usage:`). Most runs need one GPU with 10 GB or more.
 Environment variables that change step counts are for quick tests only; the defaults are the settings of the paper.
+
+## Checks
+
+```
+python src/check_splits.py            # no image in two splits (exact or near duplicate); needs the caches
+python src/select_ours.py --check     # re-derives the damage strengths of the unlearning method from out/p108 (and out/p103)
+                                      # and fails if they differ from the table that p120 / unl118 use
+pip install pytest pyflakes && python -m pytest -q tests && python -m pyflakes src tests   # CPU only, no data
+```
+
+`tests/` checks the Spotter batch composition (64 images per step and no image twice, also for groups with fewer than
+32 classes, and the unchanged draw for groups with at least 32), the selection rule, and that the unlearning scripts take
+their damage strengths from `src/select_ours.py`. The same checks run on every push (`.github/workflows/ci.yml`).
+`src/p120.py` also re-derives the selection from `out/p108` before an `OURS` run whenever those files exist, and stops on
+a difference.
+
+## Reproducibility
+
+- Versions: `requirements.txt` lists the versions used for the paper (Python 3.10, CUDA 12.1).
+- Seeds: every script fixes its seeds (seed 0 unless the script takes a seed argument); data order and augmentation use
+  seeded generators.
+- GPU kernels: the paper runs used the default (non-deterministic) cuDNN / cuBLAS kernels, so a rerun matches the reported
+  numbers up to small run-to-run differences, not bit for bit. `FRF_DETERMINISTIC=1` switches to deterministic kernels where
+  PyTorch provides them (slower).
+- Data: the splits are rebuilt from the public datasets by `src/build_cache.py` / `src/build_fresh.py`; each cache stores
+  a manifest with per-file SHA-256 hashes, and `src/check_splits.py` verifies that the splits are disjoint.
 
 ## License
 

@@ -42,6 +42,7 @@ from p91 import acc  # noqa: E402
 from p99 import ce_attack, wrap, fold  # noqa: E402
 from p100 import fisher, dampen  # noqa: E402
 from p106 import strong_attacks  # noqa: E402
+from spotter_sampling import spotter_classes, spotter_images  # noqa: E402
 
 OUT = os.environ.get("P108_OUT", "out/p108")
 STEPS = int(os.environ.get("P108_STEPS", 3000))  # paper: default value (override only for quick tests)
@@ -87,26 +88,6 @@ def pgd(nat, nrm, x01, eps=0.03, step=0.01, its=3):
         g, = torch.autograd.grad(loss, d)
         d = (d.detach() + step * g.sign()).clamp(-eps, eps)
     return (x01 + d).clamp(0, 1).detach()
-
-
-def spotter_classes(n, k, g):
-    """k forget classes for one Spotter step (2 images each). With n < k classes (insects: 27) every class is used once and
-    the remaining k - n slots are filled with further distinct classes, so a step always has 2k = 64 images."""
-    if n >= k:
-        return torch.randperm(n, generator=g)[:k]
-    return torch.cat([torch.randperm(n, generator=g), torch.randperm(n, generator=g)[:k - n]])  # k - n <= n: no class more than twice
-
-
-def spotter_images(byc, cls, g):
-    """2 images per class slot; a class drawn twice gets 4 distinct images (one permutation per class, consumed in pairs),
-    so no image occurs twice in a step."""
-    perm, pos, out = {}, {}, []
-    for c in cls.tolist():
-        if c not in perm:
-            perm[c], pos[c] = torch.randperm(len(byc[c]), generator=g), 0
-        out.append(byc[c][perm[c][pos[c]:pos[c] + 2]])
-        pos[c] += 2
-    return torch.stack(out).flatten()
 
 
 def train(m, nat, nrm, xd, xr, yr, kind, steps, seed=0):

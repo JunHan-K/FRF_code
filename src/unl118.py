@@ -26,9 +26,11 @@ from p100 import fisher  # noqa: E402
 from p101 import repair  # noqa: E402
 from p102 import head_reinit  # noqa: E402
 from p110 import frf  # noqa: E402
+import select_ours as SEL  # noqa: E402
 
 STEPS = int(os.environ.get("U118_STEPS", 3000))  # paper: default value (override only for quick tests)
-OURS_ALPHA = {"deit_s": 3.0, "deit3_s": 10.0, "augreg_s": 10.0, "deit_b": 10.0, "deit3_b": 10.0, "augreg_b": 10.0}
+# damage strength of OURS on dogs, chosen on id_hold only (see src/select_ours.py)
+OURS_ALPHA = {m: float(a) for m, a in {**SEL.SELECTED["dogs"], **SEL.SELECTED_VITB}.items()}
 
 
 @torch.no_grad()

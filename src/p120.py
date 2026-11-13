@@ -37,14 +37,13 @@ from p106 import strong_ft  # noqa: E402
 from p110 import frf  # noqa: E402
 from p112 import mixed_ft  # noqa: E402
 import unl118 as U  # noqa: E402
+import select_ours as SEL  # noqa: E402
 
 assert U.FORGET is FORGET
 OUT = os.environ.get("P120_OUT", "out/p120")
 ATT = int(os.environ.get("P120_ATT", 1000))  # paper: default value (override only for quick tests)
-# damage strength of OURS, chosen on id_hold only (PREREG102 rule on the p108 runs; reproduced by src/select_ours.py)
-OURS_ALPHA = {"birds": {"deit_s": 3, "deit3_s": 10, "augreg_s": 10},
-              "reptiles": {"deit_s": 10, "deit3_s": 10, "augreg_s": 10},
-              "insects": {"deit_s": 3, "deit3_s": 10, "augreg_s": 10}}
+# damage strength of OURS, chosen on id_hold only (PREREG102 rule on the p108 runs; see src/select_ours.py)
+OURS_ALPHA = {g: SEL.SELECTED[g] for g in GROUPS}
 FULL = ("native", "HRr", "RL", "SCRUB", "OURS")
 
 
@@ -70,6 +69,10 @@ def rewind(nat, m, nrm, xF, yF, xR, yR):
 def main(group, model, arm):
     os.makedirs(OUT, exist_ok=True)
     fn = f"{OUT}/p120_{group}_{model}_{arm}.json"
+    if arm == "OURS" and SEL.available(group):  # re-derive the selection from the p108 runs if they are present
+        a = SEL.select(group, model)
+        if a != OURS_ALPHA[group][model]:
+            sys.exit(f"OURS alpha from out/p108 ({a}) differs from select_ours.SELECTED ({OURS_ALPHA[group][model]})")
     D.M = s12r.MODELS[model]
     torch.manual_seed(0)
     nat = p18.frozen(S.load(D.M).to(S.dev))

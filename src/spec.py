@@ -1,4 +1,4 @@
-"""Functional role spectrum estimator (PREREG34/35, amended 2026-10-24).
+"""Functional role spectrum estimator (PREREG34/35).
 Model: e_u = s * sum_b w_b e_b + r,  w_b >= 0, sum_b w_b = 1, s >= 0, in the Fisher metric of a predictive p.
   composition w (what role), strength s (how strongly), novelty nu = |r|^2 / |e_u|^2 (function outside the reference set).
 Solved as non-negative least squares v = s * w (v >= 0), then s = sum v, w = v / s.

@@ -336,7 +336,7 @@ def main(model, p, slot, sol=None, tag=None):
                 sv[name] = torch.autograd.grad((bb(hh) * cot).sum(), hh)[0].detach()
             acc["m9_backward"].append(proj(sv["u"] - sv["i"], sv["j"] - sv["i"]).cpu())
         r = {n: float(torch.cat(v).float().mean()) for n, v in acc.items()}
-        if SPEC:  # PREREG34 (amended): composition w, strength s, novelty nu, identifiability groups, per-image values
+        if SPEC:  # PREREG34: composition w, strength s, novelty nu, identifiability groups, per-image values
             Gx, cx, ux = torch.cat(sg["G"]), torch.cat(sg["c"]), torch.cat(sg["u"])
             A = spec.analyze(Gx, cx, ux, list(range(nL)))
             pi = A.pop("pi")
